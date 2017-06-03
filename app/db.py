@@ -7,6 +7,6 @@ class DB:
         self.cur = self.conn.cursor()
 
     def init_db(self):
-        with open('sheme.sql', mode='r') as f:
+        with open('schema.sql', mode='r') as f:
             self.cur.execute(f.read())
             self.conn.commit()
