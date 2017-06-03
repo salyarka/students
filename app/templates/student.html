@@ -4,6 +4,19 @@
     <title>Students</title>
 </head>
 <body>
-    <p>Test</p>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>New student</p>
+        <p>Name:</p>
+        {{ form.name }}
+        <p>Surname:</p>
+        {{ form.surname }}
+        {{ form.create }}
+    </form>
+    <ul>
+        {% for each in students %}
+            <li>{{ each }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
