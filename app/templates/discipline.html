@@ -4,6 +4,16 @@
     <title>Discipline</title>
 </head>
 <body>
-    <p>Test</p>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>New discipline</p>
+        <p>Title:</p>{{ form.title }}
+        {{ form.create }}
+    </form>
+    <ul>
+        {% for each in disciplines %}
+            <li>{{ each }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
