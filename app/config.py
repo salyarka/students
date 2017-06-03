@@ -1,12 +1,13 @@
 import os
 
 
-class DefaultConfig:
+class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    DB_USERNAME = os.environ.get('DB_USERNAME')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD')
+    dbname = os.environ.get('DB_NAME')
+    user = os.environ.get('DB_USERNAME')
+    password = os.environ.get('DB_PASSWORD')
+    DATABASE = {'dbname': dbname, 'user': user, 'password': password}
 
-class TestingConfig(DefaultConfig):
+class Test(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
-    
