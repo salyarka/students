@@ -19,6 +19,7 @@ class BasicsTestCase(unittest.TestCase):
         self.assertFalse(current_app is None)
 
     def test_app_is_testing(self):
+        print(current_app.config)
         self.assertTrue(current_app.config['TESTING'])
 
     def test_db_connection(self):

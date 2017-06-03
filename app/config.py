@@ -8,6 +8,17 @@ class Config:
     password = os.environ.get('DB_PASSWORD')
     DATABASE = {'dbname': dbname, 'user': user, 'password': password}
 
+
+class Develop(Config):
+    DEBUG = True
+
+
 class Test(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+
+
+config = {
+    'develop': Develop,
+    'testing': Test
+}
