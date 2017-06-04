@@ -10,7 +10,8 @@ def index():
 
 @app.route('/discipline', methods=['GET', 'POST'])
 def discipline():
-    disciplines = [1,2,3]
+    discipline = db.get_model('Discipline')
+    disciplines = discipline.get()
     form = DisciplineForm()
     if form.validate_on_submit():
         return redirect(url_for('discipline'))
@@ -19,10 +20,27 @@ def discipline():
     )
 
 
+@app.route('/discipline/<int:identificator>', methods=['DELETE'])
+def del_discipline(identificator):
+    discipline = db.get_model('Discipline')
+    discipline.remove(identificator)
+    db.commit()
+    return redirect(url_for('discipline'))
+
+
 @app.route('/student', methods=['GET', 'POST'])
 def student():
-    students = ['jaba', 'baba']
+    student = db.get_model('Student')
+    students = student.get()
     form = StudentForm()
     if form.validate_on_submit():
         return redirect(url_for('student'))
     return render_template('student.html', students=students, form=form)
+
+
+@app.route('/student/<int:identificator>', methods=['DELETE'])
+def del_student(identificator):
+    student = db.get_model('Student')
+    student.remove(identificator)
+    db.commit()
+    return redirect(url_for('student'))
