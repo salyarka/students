@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student</title>
-</head>
-<body>
-    <h1>Student: {{ student['name'] }} {{ student['surname'] }}</h1>
-    <form action="{{ url_for('update_student', identificator=student['id']) }}">
-        {{ form.hidden_tag() }}
-        <input type="hidden" name="_method" value="PUT">
-        <p>New Name:</p>{{ form.name }}
-        <p>New Surname:</p>{{ form.surname }}
-        {{ form.update }}
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}{{ student['name'] }} {{ student['surname'] }}{% endblock %}
+{% block content %}
+<h1>Student: {{ student['name'] }} {{ student['surname'] }}</h1>
+<form action="{{ url_for('update_student', identificator=student['id']) }}">
+    {{ form.hidden_tag() }}
+    <input type="hidden" name="_method" value="PUT">
+    <p>New Name:</p>{{ form.name }}
+    <p>New Surname:</p>{{ form.surname }}
+    {{ form.update }}
+</form>
+{% endblock %}

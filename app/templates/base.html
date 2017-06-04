@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+    {% block navbar %}
+    <a href="{{ url_for('discipline') }}">Disciplines</a>
+    <a href="{{ url_for('students') }}">Students</a>
+    <hr>
+    {% endblock %}
+    {% block content %}{% endblock %}
+</body>
+</html>
