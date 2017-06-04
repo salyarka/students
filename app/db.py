@@ -1,5 +1,5 @@
 import psycopg2
-import psycopg2.extras
+from psycopg2.extras import DictCursor
 
 class DB:
 
@@ -29,7 +29,7 @@ class Student:
         self.cur = cur
 
     def get(self, identificator=None):
-        dict_cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        dict_cur = self.conn.cursor(cursor_factory=DictCursor)
         if identificator is None:
             dict_cur.execute('SELECT id, name, surname FROM student')
             return [dict(row) for row in dict_cur]
@@ -57,6 +57,39 @@ class Student:
             (name, surname, identificator)
         )
 
+    def get_scores(self, identificator):
+        dict_cur = self.conn.cursor(cursor_factory=DictCursor)
+        dict_cur.execute(
+            'SELECT id, discipline_id, score '
+            'FROM student_discipline WHERE student_id = %s;',
+            (identificator,)
+        )
+        return {
+            dict(row)['discipline_id']: {
+                'score': dict(row)['score'], 'id': dict(row)['id']
+            } for row in dict_cur
+        }
+
+    def set_score(self, new_score, discepline, student_id, score_id):
+        if not score_id:
+            print(new_score, discepline, student_id, score_id)
+            self.cur.execute(
+                'INSERT INTO student_discipline '
+                '(score, discipline_id, student_id) VALUES (%s, %s, %s);',
+                (new_score, discepline, student_id)
+            )
+        else:
+            self.cur.execute(
+                'UPDATE student_discipline SET score = %s WHERE id = %s;',
+                (new_score, score_id)
+            )
+
+    def unset_score(self, score_id):
+        self.cur.execute(
+            'DELETE FROM student_discipline WHERE id = %s;', (score_id,)
+        )
+
+
 class Discipline:
 
     def __init__(self, conn, cur):
@@ -69,7 +102,7 @@ class Discipline:
         )
 
     def get(self):
-        dict_cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        dict_cur = self.conn.cursor(cursor_factory=DictCursor)
         dict_cur.execute('SELECT id, title FROM discipline')
         return [dict(row) for row in dict_cur]
 
