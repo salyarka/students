@@ -44,7 +44,7 @@ class Student:
             'DELETE FROM student WHERE id = %s;', (identificator,)
         )
 
-    def update_row(self, name, surname, identificator):
+    def update_row(self, identificator, name, surname):
         self.cur.execute(
             'UPDATE student SET name = %s, surname = %s WHERE id = %s;',
             (name, surname, identificator)
@@ -71,7 +71,7 @@ class Discipline:
             'DELETE FROM discipline WHERE id = %s;', (identificator,)
         )
 
-    def update_row(self, title, identificator):
+    def update_row(self, identificator, title):
         self.cur.execute(
             'UPDATE discipline SET title = %s WHERE id = %s;',
             (title, identificator)
