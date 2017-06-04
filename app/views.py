@@ -14,6 +14,8 @@ def discipline():
     disciplines = discipline.get()
     form = DisciplineForm()
     if form.validate_on_submit():
+        discipline.add(form.title.data)
+        db.commit()
         return redirect(url_for('discipline'))
     return render_template(
         'discipline.html', disciplines=disciplines, form=form
@@ -34,6 +36,8 @@ def student():
     students = student.get()
     form = StudentForm()
     if form.validate_on_submit():
+        student.add(form.name.data, form.surname.data)
+        db.commit()
         return redirect(url_for('student'))
     return render_template('student.html', students=students, form=form)
 
