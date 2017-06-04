@@ -2,23 +2,28 @@
 {% block title %}Students{% endblock %}
 {% block content %}
 <form method="POST">
-    {{ form.hidden_tag() }}
-    <p>New student</p>
-    <p>Name:</p>
-    {{ form.name }}
-    <p>Surname:</p>
-    {{ form.surname }}
-    {{ form.create }}
+  {{ form.hidden_tag() }}
+  <p>New student</p>
+  <p>Name:</p>
+  {{ form.name }}
+  <p>Surname:</p>
+  {{ form.surname }}
+  {{ form.create }}
 </form>
-<ul>
-    {% for each in students %}
-        <li>
-            <a href="{{ url_for('student', identificator=each['id']) }}">{{ each['name'] }} {{ each['surname'] }}</a>
-            <form action="{{ url_for('del_student', identificator=each['id']) }}">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit">Delete</button>
-            </form>
-        </li>
-    {% endfor %}
-</ul>
+<hr>
+<table>
+  {% for each in students %}
+    <tr>
+      <td>
+        <a href="{{ url_for('student', identificator=each['id']) }}">{{ each['name'] }} {{ each['surname'] }}</a>
+      </td>
+      <td>
+        <form action="{{ url_for('del_student', identificator=each['id']) }}" style="display: inline; margin-left: 2%;">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
 {% endblock %}

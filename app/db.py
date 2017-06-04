@@ -1,32 +1,27 @@
 import psycopg2
 from psycopg2.extras import DictCursor
 
-class DB:
 
-    def __init__(self, app):
-        self.conn = psycopg2.connect(**app.config['DATABASE'])
-        self.cur = self.conn.cursor()
-
-    def init_db(self):
-        with open('schema.sql', mode='r') as f:
-            self.cur.execute(f.read())
-            self.conn.commit()
-
-    def get_model(self, model_name):
-        if model_name == 'Student':
-            return Student(self.conn, self.cur)
-        elif model_name == 'Discipline':
-            return Discipline(self.conn, self.cur)
-
-    def commit(self):
-        self.conn.commit()
-
-
-class Student:
+class Table:
 
     def __init__(self, conn, cur):
         self.conn = conn
         self.cur = cur
+
+    def get(self):
+        raise NotImplementedError('Subclasses should implement this!')
+
+    def add(self):
+        raise NotImplementedError('Subclasses should implement this!')
+
+    def remove(self):
+        raise NotImplementedError('Subclasses should implement this!')
+
+    def update(self):
+        raise NotImplementedError('Subclasses should implement this!')
+
+
+class Student(Table):
 
     def get(self, identificator=None):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -51,7 +46,7 @@ class Student:
             'DELETE FROM student WHERE id = %s;', (identificator,)
         )
 
-    def update_row(self, identificator, name, surname):
+    def update(self, identificator, name, surname):
         self.cur.execute(
             'UPDATE student SET name = %s, surname = %s WHERE id = %s;',
             (name, surname, identificator)
@@ -70,13 +65,12 @@ class Student:
             } for row in dict_cur
         }
 
-    def set_score(self, new_score, discepline, student_id, score_id):
+    def set_score(self, new_score, discipline, student_id, score_id):
         if not score_id:
-            print(new_score, discepline, student_id, score_id)
             self.cur.execute(
                 'INSERT INTO student_discipline '
                 '(score, discipline_id, student_id) VALUES (%s, %s, %s);',
-                (new_score, discepline, student_id)
+                (new_score, discipline, student_id)
             )
         else:
             self.cur.execute(
@@ -90,11 +84,7 @@ class Student:
         )
 
 
-class Discipline:
-
-    def __init__(self, conn, cur):
-        self.conn = conn
-        self.cur = cur
+class Discipline(Table):
 
     def add(self, title):
         self.cur.execute(
@@ -111,8 +101,33 @@ class Discipline:
             'DELETE FROM discipline WHERE id = %s;', (identificator,)
         )
 
-    def update_row(self, identificator, title):
+    def update(self, identificator, title):
         self.cur.execute(
             'UPDATE discipline SET title = %s WHERE id = %s;',
             (title, identificator)
         )
+
+
+class DB:
+    tables = {
+        'student': Student,
+        'discipline': Discipline
+    }
+
+    def __init__(self, app):
+        self.conn = psycopg2.connect(**app.config['DATABASE'])
+        self.cur = self.conn.cursor()
+
+    def init_db(self):
+        with open('schema.sql', mode='r') as f:
+            self.cur.execute(f.read())
+            self.conn.commit()
+
+    def get_table(self, table_name):
+        table = self.tables.get(table_name)
+        if table is not None:
+            return table(self.conn, self.cur)
+
+    def commit(self):
+        self.conn.commit()
+        

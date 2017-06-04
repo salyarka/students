@@ -1,6 +1,11 @@
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, abort
 from .forms import StudentForm, DisciplineForm
 from app import app, db
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @app.route('/')
@@ -10,7 +15,7 @@ def index():
 
 @app.route('/discipline', methods=['GET', 'POST'])
 def discipline():
-    discipline = db.get_model('Discipline')
+    discipline = db.get_table('discipline')
     disciplines = discipline.get()
     form = DisciplineForm()
     if form.validate_on_submit():
@@ -24,7 +29,7 @@ def discipline():
 
 @app.route('/discipline/<int:identificator>', methods=['DELETE'])
 def del_discipline(identificator):
-    discipline = db.get_model('Discipline')
+    discipline = db.get_table('discipline')
     discipline.remove(identificator)
     db.commit()
     return redirect(url_for('discipline'))
@@ -34,15 +39,15 @@ def del_discipline(identificator):
 def update_discipline(identificator):
     new_title = request.args.get('title')
     if new_title:
-        discipline = db.get_model('Discipline')
-        discipline.update_row(identificator, new_title)
+        discipline = db.get_table('discipline')
+        discipline.update(identificator, new_title)
         db.commit()
     return redirect(url_for('discipline'))
 
 
 @app.route('/student', methods=['GET', 'POST'])
 def students():
-    student = db.get_model('Student')
+    student = db.get_table('student')
     students = student.get()
     form = StudentForm()
     if form.validate_on_submit():
@@ -54,17 +59,19 @@ def students():
 
 @app.route('/student/<int:identificator>', methods=['GET', 'POST'])
 def student(identificator):
-    student_model = db.get_model('Student')
-    discepline = db.get_model('Discipline')
-    student = student_model.get(identificator)
-    disciplines = discepline.get()
-    scores = student_model.get_scores(identificator)
+    student_table = db.get_table('student')
+    student = student_table.get(identificator)
+    if student is None:
+        abort(404)
+    discipline = db.get_table('discipline')
+    disciplines = discipline.get()
+    scores = student_table.get_scores(identificator)
     for each in disciplines:
         if each['id'] not in scores:
             scores[each['id']] = {'score': '', 'id': 0}
     form = StudentForm()
     if form.validate_on_submit():
-        student.update_row(identificator, new_name, new_surname)
+        student.update(identificator, new_name, new_surname)
         db.commit()
         return redirect(url_for('student'))
     return render_template(
@@ -76,7 +83,7 @@ def student(identificator):
 
 @app.route('/student/<int:identificator>', methods=['DELETE'])
 def del_student(identificator):
-    student = db.get_model('Student')
+    student = db.get_table('student')
     student.remove(identificator)
     db.commit()
     return redirect(url_for('students'))
@@ -87,24 +94,25 @@ def update_student(identificator):
     new_name = request.args.get('name')
     new_surname = request.args.get('surname')
     if new_name and new_surname:
-        student = db.get_model('Student')
-        student.update_row(identificator, new_name, new_surname)
+        student = db.get_table('student')
+        student.update(identificator, new_name, new_surname)
         db.commit()
     return redirect(url_for('student', identificator=identificator))
 
 
 @app.route(
-    '/student/<int:identificator>/<int:discepline>/<int:score_id>',
+    '/student/<int:identificator>/<int:discipline>/<int:score_id>',
     methods=['PUT']
 )
-def set_score(identificator, discepline, score_id):
+def set_score(identificator, discipline, score_id):
+    print(request.args)
     new_score = request.args.get('update_score')
     if new_score:
         try:
             if int(new_score) in range(1, 6):
-                student = db.get_model('Student')
+                student = db.get_table('student')
                 student.set_score(
-                    new_score, discepline, identificator, int(score_id)
+                    new_score, discipline, identificator, int(score_id)
                 )
                 db.commit()
         except ValueError:
@@ -114,7 +122,7 @@ def set_score(identificator, discepline, score_id):
 
 @app.route('/student/<int:identificator>/<int:score_id>/', methods=['PATCH'])
 def unset_score(identificator, score_id):
-    student = db.get_model('Student')
+    student = db.get_table('student')
     student.unset_score(score_id)
     db.commit()
     return redirect(url_for('student', identificator=identificator))

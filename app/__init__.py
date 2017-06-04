@@ -1,13 +1,13 @@
 import os
 from flask import Flask
 from flask_script import Manager
-from app.db import DB
-from .config import config
 from flask_modus import Modus
+from .config import config
+from app.db import DB
 
 
 app = Flask(__name__)
-app.config.from_object(config[os.getenv('FLASK_CONFIG') or 'develop'])
+app.config.from_object(config[os.getenv('FLASK_CONFIG') or 'standard'])
 modus = Modus(app)
 db = DB(app)
 
