@@ -15,7 +15,14 @@
     </form>
     <ul>
         {% for each in students %}
-            <li>{{ each }}</li>
+            <li>
+                {{ each['name'] }} {{ each['surname'] }}
+                <form action="{{ url_for('del_student', identificator=each['id']) }}">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
         {% endfor %}
     </ul>
 </body>
