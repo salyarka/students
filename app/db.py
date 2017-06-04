@@ -28,10 +28,17 @@ class Student:
         self.conn = conn
         self.cur = cur
 
-    def get(self):
+    def get(self, identificator=None):
         dict_cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        dict_cur.execute('SELECT id, name, surname FROM student')
-        return [dict(row) for row in dict_cur]
+        if identificator is None:
+            dict_cur.execute('SELECT id, name, surname FROM student')
+            return [dict(row) for row in dict_cur]
+        dict_cur.execute(
+            'SELECT id, name, surname FROM student WHERE id = %s',
+            (identificator,)
+        )
+        return dict_cur.fetchone()
+
 
     def add(self, name, surname):
         self.cur.execute(
