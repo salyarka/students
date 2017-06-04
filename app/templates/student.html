@@ -24,7 +24,7 @@
           {{ scores[each['id']]['score'] }}
         </td>
         <td style="border: 1px solid; padding: 5px;">
-          <form action="{{ url_for('set_score', identificator=student['id'], discepline=each['id'], score_id=scores[each['id']]['id']) }}">
+          <form action="{{ url_for('set_score', identificator=student['id'], discipline=each['id'], score_id=scores[each['id']]['id']) }}">
             <input type="hidden" name="_method" value="PUT">
             <input type="text" name="update_score">
             <button type="submit">Set</button>
