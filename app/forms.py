@@ -7,9 +7,12 @@ class StudentForm(FlaskForm):
     name = StringField('Name', validators=[Required()])
     surname = StringField('Surname', validators=[Required()])
     create = SubmitField('Create')
+    update = SubmitField('Update')
 
 
 class DisciplineForm(FlaskForm):
     title = StringField('Title', validators=[Required()])
     create = SubmitField('Create')
+    update = SubmitField('Update')
+
     
