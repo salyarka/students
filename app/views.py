@@ -1,6 +1,11 @@
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, abort
 from .forms import StudentForm, DisciplineForm
 from app import app, db
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @app.route('/')
@@ -54,11 +59,13 @@ def students():
 
 @app.route('/student/<int:identificator>', methods=['GET', 'POST'])
 def student(identificator):
-    student_model = db.get_table('student')
+    student_table = db.get_table('student')
+    student = student_table.get(identificator)
+    if student is None:
+        abort(404)
     discipline = db.get_table('discipline')
-    student = student_model.get(identificator)
     disciplines = discipline.get()
-    scores = student_model.get_scores(identificator)
+    scores = student_table.get_scores(identificator)
     for each in disciplines:
         if each['id'] not in scores:
             scores[each['id']] = {'score': '', 'id': 0}
@@ -98,6 +105,7 @@ def update_student(identificator):
     methods=['PUT']
 )
 def set_score(identificator, discipline, score_id):
+    print(request.args)
     new_score = request.args.get('update_score')
     if new_score:
         try:
