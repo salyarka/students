@@ -3,10 +3,41 @@
 {% block content %}
 <h1>Student: {{ student['name'] }} {{ student['surname'] }}</h1>
 <form action="{{ url_for('update_student', identificator=student['id']) }}">
-    {{ form.hidden_tag() }}
-    <input type="hidden" name="_method" value="PUT">
-    <p>New Name:</p>{{ form.name }}
-    <p>New Surname:</p>{{ form.surname }}
-    {{ form.update }}
+  {{ form.hidden_tag() }}
+  <input type="hidden" name="_method" value="PUT">
+  <p>New Name:</p>{{ form.name }}
+  <p>New Surname:</p>{{ form.surname }}
+  {{ form.update }}
 </form>
+<table>
+  <thead>
+    <th style="border: 1px solid; padding: 5px;">Discipline</th>
+    <th style="border: 1px solid; padding: 5px;">Score</th>
+    <th style="border: 1px solid; padding: 5px;">Set</th>
+    <th style="border: 1px solid; padding: 5px;">Delete</th>
+  </thead>
+  <tbody>
+    {% for each in disciplines %}
+      <tr>
+        <td style="border: 1px solid; padding: 5px;">{{ each['title'] }}</td>
+        <td style="border: 1px solid; padding: 5px;">
+          {{ scores[each['id']]['score'] }}
+        </td>
+        <td style="border: 1px solid; padding: 5px;">
+          <form action="{{ url_for('set_score', identificator=student['id'], discepline=each['id'], score_id=scores[each['id']]['id']) }}">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="text" name="update_score">
+            <button type="submit">Set</button>
+          </form>
+        </td>
+        <td style="border: 1px solid; padding: 5px;">
+          <form action="{{ url_for('unset_score', identificator=student['id'], score_id=scores[each['id']]['id']) }}">
+            <input type="hidden" name="_method" value="PATCH">
+            <button type="submit">Unset</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
