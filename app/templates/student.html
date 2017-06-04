@@ -1,36 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Students</title>
+    <title>Student</title>
 </head>
 <body>
-    <form method="POST">
+    <h1>Student: {{ student['name'] }} {{ student['surname'] }}</h1>
+    <form action="{{ url_for('update_student', identificator=student['id']) }}">
         {{ form.hidden_tag() }}
-        <p>New student</p>
-        <p>Name:</p>
-        {{ form.name }}
-        <p>Surname:</p>
-        {{ form.surname }}
-        {{ form.create }}
+        <input type="hidden" name="_method" value="PUT">
+        <p>New Name:</p>{{ form.name }}
+        <p>New Surname:</p>{{ form.surname }}
+        {{ form.update }}
     </form>
-    <ul>
-        {% for each in students %}
-            <li>
-                {{ each['name'] }} {{ each['surname'] }}
-                <form action="{{ url_for('del_student', identificator=each['id']) }}">
-                    {{ form.hidden_tag() }}
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit">Delete</button>
-                </form>
-                <form action="{{ url_for('update_student', identificator=each['id']) }}">
-                    {{ form.hidden_tag() }}
-                    <input type="hidden" name="_method" value="PUT">
-                    <p>New Name:</p>{{ form.name }}
-                    <p>New Surname:</p>{{ form.surname }}
-                    {{ form.update }}
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
 </body>
 </html>

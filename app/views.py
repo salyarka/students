@@ -42,15 +42,28 @@ def update_discipline(identificator):
 
 
 @app.route('/student', methods=['GET', 'POST'])
-def student():
+def students():
     student = db.get_model('Student')
     students = student.get()
     form = StudentForm()
     if form.validate_on_submit():
         student.add(form.name.data, form.surname.data)
         db.commit()
+        return redirect(url_for('students'))
+    return render_template('students.html', students=students, form=form)
+
+
+@app.route('/student/<int:identificator>', methods=['GET', 'POST'])
+def student(identificator):
+    student_model = db.get_model('Student')
+    student = student_model.get(identificator)
+    print(student)
+    form = StudentForm()
+    if form.validate_on_submit():
+        student.update_row(identificator, new_name, new_surname)
+        db.commit()
         return redirect(url_for('student'))
-    return render_template('student.html', students=students, form=form)
+    return render_template('student.html', student=student, form=form)
 
 
 @app.route('/student/<int:identificator>', methods=['DELETE'])
@@ -58,7 +71,7 @@ def del_student(identificator):
     student = db.get_model('Student')
     student.remove(identificator)
     db.commit()
-    return redirect(url_for('student'))
+    return redirect(url_for('students'))
 
 
 @app.route('/student/<int:identificator>', methods=['PUT'])
@@ -69,4 +82,4 @@ def update_student(identificator):
         student = db.get_model('Student')
         student.update_row(identificator, new_name, new_surname)
         db.commit()
-    return redirect(url_for('student'))
+    return redirect(url_for('student', identificator=identificator))
