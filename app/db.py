@@ -20,25 +20,31 @@ class Table:
     def update(self):
         raise NotImplementedError('Subclasses should implement this!')
 
+    def count(self):
+        raise NotImplementedError('Subclasses should implement this!')
+
 
 class Student(Table):
 
-    def get(self, identificator=None):
+    def get(self, identificator=None, offset=None, limit=5):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
         if identificator is None:
-            dict_cur.execute('SELECT id, name, surname FROM student')
+            dict_cur.execute(
+                'SELECT id, name FROM student '
+                'ORDER BY id OFFSET %s LIMIT %s;',
+                (offset, limit)
+            )
             return [dict(row) for row in dict_cur]
         dict_cur.execute(
-            'SELECT id, name, surname FROM student WHERE id = %s',
+            'SELECT id, name FROM student WHERE id = %s;',
             (identificator,)
         )
         return dict_cur.fetchone()
 
-
-    def add(self, name, surname):
+    def add(self, name):
         self.cur.execute(
-            'INSERT INTO student(name, surname) VALUES (%s, %s);',
-            (name, surname)
+            'INSERT INTO student(name) VALUES (%s);',
+            (name,)
         )
 
     def remove(self, identificator):
@@ -46,11 +52,15 @@ class Student(Table):
             'DELETE FROM student WHERE id = %s;', (identificator,)
         )
 
-    def update(self, identificator, name, surname):
+    def update(self, identificator, name):
         self.cur.execute(
-            'UPDATE student SET name = %s, surname = %s WHERE id = %s;',
-            (name, surname, identificator)
+            'UPDATE student SET name = %s WHERE id = %s;',
+            (name, identificator)
         )
+
+    def count(self):
+        self.cur.execute('SELECT count(id) FROM student;')
+        return self.cur.fetchone()[0]
 
     def get_scores(self, identificator):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -83,6 +93,12 @@ class Student(Table):
             'DELETE FROM student_discipline WHERE id = %s;', (score_id,)
         )
 
+    # def search(self, string):
+    #     return self.cur.execute(
+    #         'SELECT id FROM student WHERE name LIKE "%%s%";',
+    #         (string, string)
+    #     )
+
 
 class Discipline(Table):
 
@@ -107,6 +123,10 @@ class Discipline(Table):
             (title, identificator)
         )
 
+    def count(self):
+        self.cur.execute('SELECT count(id) FROM discipline;')
+        return self.cur.fetchone()[0]
+
 
 class DB:
     tables = {
@@ -115,19 +135,38 @@ class DB:
     }
 
     def __init__(self, app):
-        self.conn = psycopg2.connect(**app.config['DATABASE'])
-        self.cur = self.conn.cursor()
+        # self.app = app
+        self.credentials = app.config['DATABASE']
+        # self.conn = psycopg2.connect(**app.config['DATABASE'])
+        # self.cur = self.conn.cursor()
 
     def init_db(self):
+        self.connect()
         with open('schema.sql', mode='r') as f:
             self.cur.execute(f.read())
-            self.conn.commit()
+        self.disconnect()
+
+    def fill_db(self):
+        self.connect()
+        with open('fill.sql', mode='r') as f:
+            self.cur.execute(f.read())
+        self.disconnect()
+
+    def connect(self):
+        self.conn = psycopg2.connect(**self.credentials)
+        self.cur = self.conn.cursor()
+
+    def disconnect(self):
+        self.conn.commit()
+        self.cur.close()
+        self.conn.close()
 
     def get_table(self, table_name):
         table = self.tables.get(table_name)
         if table is not None:
+            # return table(self.conn, self.cur)
             return table(self.conn, self.cur)
 
-    def commit(self):
-        self.conn.commit()
+    # def commit(self):
+    #     self.conn.commit()
         

@@ -11,6 +11,7 @@ class BasicsTestCase(unittest.TestCase):
         self.app.config.from_object('app.config.Test')
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.db = DB(app)
 
     def tearDown(self):
         self.app_context.pop()
@@ -22,5 +23,5 @@ class BasicsTestCase(unittest.TestCase):
         self.assertTrue(current_app.config['TESTING'])
 
     def test_db_connection(self):
-        db = DB(app)
-        self.assertTrue(db.conn is not None)
+        self.db.connect()
+        self.assertTrue(self.db.conn is not None)
