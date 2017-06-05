@@ -64,11 +64,10 @@ def update_discipline(identificator):
     return redirect(url_for('discipline'))
 
 
-@app.route('/student', defaults={'page': 1})
+@app.route('/student', defaults={'page': 1}, methods=['GET', 'POST'])
 @app.route(
     '/student/page/<int:page>', methods=['GET', 'POST']
 )
-# @app.route('/student', methods=['GET', 'POST'])
 def students(page):
     student = db.get_table('student')
     total = student.count()
@@ -77,7 +76,7 @@ def students(page):
     students = student.get(offset=offset)
     form = StudentForm()
     if form.validate_on_submit():
-        student.add(form.name.data, form.surname.data)
+        student.add(form.name.data)
         # db.commit()
         return redirect(url_for('students'))
     return render_template(
@@ -99,7 +98,7 @@ def student(identificator):
             scores[each['id']] = {'score': '', 'id': 0}
     form = StudentForm()
     if form.validate_on_submit():
-        student.update(identificator, new_name, new_surname)
+        student.update(identificator, new_name)
         # db.commit()
         return redirect(url_for('student'))
     return render_template(
@@ -120,10 +119,9 @@ def del_student(identificator):
 @app.route('/student/<int:identificator>', methods=['PUT'])
 def update_student(identificator):
     new_name = request.args.get('name')
-    new_surname = request.args.get('surname')
-    if new_name and new_surname:
+    if new_name:
         student = db.get_table('student')
-        student.update(identificator, new_name, new_surname)
+        student.update(identificator, new_name)
         # db.commit()
     return redirect(url_for('student', identificator=identificator))
 

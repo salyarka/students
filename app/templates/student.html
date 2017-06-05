@@ -3,15 +3,14 @@
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
-{% block title %}{{ student['name'] }} {{ student['surname'] }}{% endblock %}
+{% block title %}{{ student['name'] }}{% endblock %}
 
 {% block content %}
-<h1>Student: {{ student['name'] }} {{ student['surname'] }}</h1>
+<h1>Student: {{ student['name'] }}</h1>
 <form action="{{ url_for('update_student', identificator=student['id']) }}">
   {{ form.hidden_tag() }}
   <input type="hidden" name="_method" value="PUT">
   <p>New Name:</p>{{ form.name }}
-  <p>New Surname:</p>{{ form.surname }}
   {{ form.update }}
 </form>
 <hr>

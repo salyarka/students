@@ -5,7 +5,6 @@ from flask_wtf import FlaskForm
 
 class StudentForm(FlaskForm):
     name = StringField('Name', validators=[Required()])
-    surname = StringField('Surname', validators=[Required()])
     create = SubmitField('Create')
     update = SubmitField('Update')
 

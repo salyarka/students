@@ -1,8 +1,7 @@
 DROP TABLE IF EXISTS student, discipline, student_discipline;
 CREATE TABLE student (
 	id       	  serial PRIMARY KEY,
-	name     	  varchar(40) NOT NULL,
-	surname  	  varchar(40) NOT NULL
+	name     	  varchar(40) NOT NULL
 );
 CREATE TABLE discipline (
 	id            serial PRIMARY KEY,

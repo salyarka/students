@@ -30,21 +30,21 @@ class Student(Table):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
         if identificator is None:
             dict_cur.execute(
-                'SELECT id, name, surname FROM student '
+                'SELECT id, name FROM student '
                 'ORDER BY id OFFSET %s LIMIT %s;',
                 (offset, limit)
             )
             return [dict(row) for row in dict_cur]
         dict_cur.execute(
-            'SELECT id, name, surname FROM student WHERE id = %s;',
+            'SELECT id, name FROM student WHERE id = %s;',
             (identificator,)
         )
         return dict_cur.fetchone()
 
-    def add(self, name, surname):
+    def add(self, name):
         self.cur.execute(
-            'INSERT INTO student(name, surname) VALUES (%s, %s);',
-            (name, surname)
+            'INSERT INTO student(name) VALUES (%s);',
+            (name,)
         )
 
     def remove(self, identificator):
@@ -52,10 +52,10 @@ class Student(Table):
             'DELETE FROM student WHERE id = %s;', (identificator,)
         )
 
-    def update(self, identificator, name, surname):
+    def update(self, identificator, name):
         self.cur.execute(
-            'UPDATE student SET name = %s, surname = %s WHERE id = %s;',
-            (name, surname, identificator)
+            'UPDATE student SET name = %s WHERE id = %s;',
+            (name, identificator)
         )
 
     def count(self):
@@ -95,7 +95,7 @@ class Student(Table):
 
     # def search(self, string):
     #     return self.cur.execute(
-    #         'SELECT id FROM student WHERE name LIKE "%%s%" or surname LIKE "%%s%";',
+    #         'SELECT id FROM student WHERE name LIKE "%%s%";',
     #         (string, string)
     #     )
 
@@ -143,6 +143,12 @@ class DB:
     def init_db(self):
         self.connect()
         with open('schema.sql', mode='r') as f:
+            self.cur.execute(f.read())
+        self.disconnect()
+
+    def fill_db(self):
+        self.connect()
+        with open('fill.sql', mode='r') as f:
             self.cur.execute(f.read())
         self.disconnect()
 

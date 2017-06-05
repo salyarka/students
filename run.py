@@ -20,5 +20,13 @@ def init_db():
     print('Database initialized.')
 
 
+@manager.command
+def fill_db():
+    from app.db import DB
+    db = DB(app)
+    db.fill_db()
+    print('Database filled.')
+
+
 if __name__ == '__main__':
     manager.run()
