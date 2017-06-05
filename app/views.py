@@ -1,11 +1,26 @@
 from flask import render_template, redirect, url_for, request, abort
 from .forms import StudentForm, DisciplineForm
+from .paginator import Paginator
 from app import app, db
+
+
+PER_PAGE = 7
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+
+@app.before_request
+def before_request():
+    db.connect()
+
+
+@app.after_request
+def after_request(response):
+    db.disconnect()
+    return response
 
 
 @app.route('/')
@@ -20,7 +35,7 @@ def discipline():
     form = DisciplineForm()
     if form.validate_on_submit():
         discipline.add(form.title.data)
-        db.commit()
+        # db.commit()
         return redirect(url_for('discipline'))
     return render_template(
         'discipline.html', disciplines=disciplines, form=form
@@ -31,7 +46,7 @@ def discipline():
 def del_discipline(identificator):
     discipline = db.get_table('discipline')
     discipline.remove(identificator)
-    db.commit()
+    # db.commit()
     return redirect(url_for('discipline'))
 
 
@@ -41,20 +56,29 @@ def update_discipline(identificator):
     if new_title:
         discipline = db.get_table('discipline')
         discipline.update(identificator, new_title)
-        db.commit()
+        # db.commit()
     return redirect(url_for('discipline'))
 
 
-@app.route('/student', methods=['GET', 'POST'])
-def students():
+@app.route('/student', defaults={'page': 1})
+@app.route(
+    '/student/page/<int:page>', methods=['GET', 'POST']
+)
+# @app.route('/student', methods=['GET', 'POST'])
+def students(page):
     student = db.get_table('student')
-    students = student.get()
+    total = student.count()
+    paginator = Paginator(page, PER_PAGE, total)
+    offset = None if page == 1 else PER_PAGE * paginator.previous
+    students = student.get(offset=offset)
     form = StudentForm()
     if form.validate_on_submit():
         student.add(form.name.data, form.surname.data)
-        db.commit()
+        # db.commit()
         return redirect(url_for('students'))
-    return render_template('students.html', students=students, form=form)
+    return render_template(
+        'students.html', students=students, form=form, paginator=paginator
+    )
 
 
 @app.route('/student/<int:identificator>', methods=['GET', 'POST'])
@@ -72,7 +96,7 @@ def student(identificator):
     form = StudentForm()
     if form.validate_on_submit():
         student.update(identificator, new_name, new_surname)
-        db.commit()
+        # db.commit()
         return redirect(url_for('student'))
     return render_template(
         'student.html', student=student,
@@ -85,7 +109,7 @@ def student(identificator):
 def del_student(identificator):
     student = db.get_table('student')
     student.remove(identificator)
-    db.commit()
+    # db.commit()
     return redirect(url_for('students'))
 
 
@@ -96,7 +120,7 @@ def update_student(identificator):
     if new_name and new_surname:
         student = db.get_table('student')
         student.update(identificator, new_name, new_surname)
-        db.commit()
+        # db.commit()
     return redirect(url_for('student', identificator=identificator))
 
 
@@ -114,7 +138,7 @@ def set_score(identificator, discipline, score_id):
                 student.set_score(
                     new_score, discipline, identificator, int(score_id)
                 )
-                db.commit()
+                # db.commit()
         except ValueError:
             pass
     return redirect(url_for('student', identificator=identificator))
@@ -124,5 +148,5 @@ def set_score(identificator, discipline, score_id):
 def unset_score(identificator, score_id):
     student = db.get_table('student')
     student.unset_score(score_id)
-    db.commit()
+    # db.commit()
     return redirect(url_for('student', identificator=identificator))

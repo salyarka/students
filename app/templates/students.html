@@ -12,6 +12,12 @@
 </form>
 <hr>
 <table>
+  <thead>
+      <tr>
+          <th>Full name</th>
+          <th>Delete</th>
+      </tr>
+  </thead>
   {% for each in students %}
     <tr>
       <td>
@@ -26,4 +32,10 @@
     </tr>
   {% endfor %}
 </table>
+{% if paginator.has_previous %}
+  <a href="{{ url_for('students', page=paginator.previous) }}">previous</a>
+{% endif %}
+{% if paginator.has_next %}
+  <a href="{{ url_for('students', page=paginator.next) }}">next</a>
+{% endif %}
 {% endblock %}
