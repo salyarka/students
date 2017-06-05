@@ -25,7 +25,11 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    discipline = db.get_table('discipline')
+    student = db.get_table('student')
+    return render_template(
+        'home.html', students=student.count(), disciplines=discipline.count()
+    )
 
 
 @app.route('/discipline', methods=['GET', 'POST'])
