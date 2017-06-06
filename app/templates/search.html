@@ -3,13 +3,13 @@
 {% block content %}
 <form method="POST">
   {{ form.hidden_tag() }}
-  <p>New student</p>
+  <p>Search students</p>
   <p>Name:</p>
   {{ form.name }}
-  {{ form.create }}
+  {{ form.search }}
 </form>
 <hr>
-{% if students|length > 0 %}
+{% if students and students|length > 0 %}
   <table>
     <thead>
       <tr>
@@ -32,10 +32,12 @@
     {% endfor %}
   </table>
 {% endif %}
-{% if paginator.has_previous %}
-  <a href="{{ url_for('students', page=paginator.previous) }}">previous</a>
-{% endif %}
-{% if paginator.has_next %}
-  <a href="{{ url_for('students', page=paginator.next) }}">next</a>
+{% if paginator %}
+  {% if paginator.has_previous %}
+    <a href="{{ url_for('search', page=paginator.previous, query=query) }}">previous</a>
+  {% endif %}
+  {% if paginator.has_next %}
+    <a href="{{ url_for('search', page=paginator.next, query=query) }}">next</a>
+  {% endif %}
 {% endif %}
 {% endblock %}

@@ -26,12 +26,12 @@ class Table:
 
 class Student(Table):
 
-    def get(self, identificator=None, offset=None, limit=5):
+    def get(self, identificator=None, offset=None, limit=15):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
         if identificator is None:
             dict_cur.execute(
                 'SELECT id, name FROM student '
-                'ORDER BY id OFFSET %s LIMIT %s;',
+                'ORDER BY id DESC OFFSET %s LIMIT %s;',
                 (offset, limit)
             )
             return [dict(row) for row in dict_cur]
@@ -58,9 +58,15 @@ class Student(Table):
             (name, identificator)
         )
 
-    def count(self):
-        self.cur.execute('SELECT count(id) FROM student;')
-        return self.cur.fetchone()[0]
+    def count(self, string=None):
+        if string is None:
+            self.cur.execute('SELECT count(id) FROM student;')
+        else:
+            self.cur.execute(
+                'SELECT count(id) FROM student WHERE name LIKE %s;',
+                ('%{}%'.format(string),)
+            )
+        return self.cur.fetchone()[0] 
 
     def get_scores(self, identificator):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -93,11 +99,14 @@ class Student(Table):
             'DELETE FROM student_discipline WHERE id = %s;', (score_id,)
         )
 
-    # def search(self, string):
-    #     return self.cur.execute(
-    #         'SELECT id FROM student WHERE name LIKE "%%s%";',
-    #         (string, string)
-    #     )
+    def search(self, string, offset, limit):
+        dict_cur = self.conn.cursor(cursor_factory=DictCursor)
+        dict_cur.execute(
+            'SELECT id, name FROM student WHERE'
+            ' name LIKE %s OFFSET %s LIMIT %s;',
+            ('%{}%'.format(string), offset, limit)
+        )
+        return [dict(row) for row in dict_cur]
 
 
 class Discipline(Table):
@@ -135,20 +144,11 @@ class DB:
     }
 
     def __init__(self, app):
-        # self.app = app
         self.credentials = app.config['DATABASE']
-        # self.conn = psycopg2.connect(**app.config['DATABASE'])
-        # self.cur = self.conn.cursor()
 
-    def init_db(self):
+    def execute_sql(self, source):
         self.connect()
-        with open('schema.sql', mode='r') as f:
-            self.cur.execute(f.read())
-        self.disconnect()
-
-    def fill_db(self):
-        self.connect()
-        with open('fill.sql', mode='r') as f:
+        with open(source, mode='r') as f:
             self.cur.execute(f.read())
         self.disconnect()
 
@@ -164,9 +164,5 @@ class DB:
     def get_table(self, table_name):
         table = self.tables.get(table_name)
         if table is not None:
-            # return table(self.conn, self.cur)
             return table(self.conn, self.cur)
-
-    # def commit(self):
-    #     self.conn.commit()
         

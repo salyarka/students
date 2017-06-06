@@ -5,7 +5,7 @@ class Config:
     dbname = os.environ.get('DB_NAME')
     user = os.environ.get('DB_USERNAME')
     password = os.environ.get('DB_PASSWORD')
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.urandom(24)
     DATABASE = {'dbname': dbname, 'user': user, 'password': password}
 
 
