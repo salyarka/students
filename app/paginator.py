@@ -2,6 +2,9 @@ from math import ceil
 
 
 class Paginator:
+    """
+    Implements pagination.
+    """
 
     def __init__(self, page, per_page, total_count):
         self.page = page

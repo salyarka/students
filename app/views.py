@@ -4,7 +4,7 @@ from .paginator import Paginator
 from app import app, db
 
 
-PER_PAGE = 15
+PER_PAGE = 15 # Number of students in pages (stedents and search).
 
 
 @app.errorhandler(404)
@@ -34,6 +34,9 @@ def index():
 
 @app.route('/discipline', methods=['GET', 'POST'])
 def discipline():
+    """
+    View for all disciplines.
+    """
     discipline = db.get_table('discipline')
     disciplines = discipline.get()
     form = DisciplineForm()
@@ -66,6 +69,9 @@ def update_discipline(identificator):
     '/student/page/<int:page>', methods=['GET', 'POST']
 )
 def students(page):
+    """
+    View for all students.
+    """
     student = db.get_table('student')
     total = student.count()
     paginator = Paginator(page, PER_PAGE, total)
@@ -85,6 +91,9 @@ def students(page):
 )
 @app.route('/search/page/<int:page>/<query>', methods=['GET', 'POST'])
 def search(page, query, paginator=None, students=None, offset=None):
+    """
+    View for students search.
+    """
     form = SearchForm()
     if form.validate_on_submit():
         student = db.get_table('student')
@@ -108,6 +117,9 @@ def search(page, query, paginator=None, students=None, offset=None):
 
 @app.route('/student/<int:identificator>', methods=['GET', 'POST'])
 def student(identificator):
+    """
+    View for student card.
+    """
     student_table = db.get_table('student')
     student = student_table.get(identificator)
     if student is None:
@@ -159,6 +171,7 @@ def set_score(identificator, discipline, score_id):
                     new_score, discipline, identificator, int(score_id)
                 )
         except ValueError:
+            # Check that incoming data are valid.
             pass
     return redirect(url_for('student', identificator=identificator))
 

@@ -3,10 +3,13 @@ from psycopg2.extras import DictCursor
 
 
 class Table:
-
-    def __init__(self, conn, cur):
+    """Abstract class Table
+    Describes common actions with tables.
+    """
+    def __init__(self, conn, cur, validator):
         self.conn = conn
         self.cur = cur
+        self.validator = validator
 
     def get(self):
         raise NotImplementedError('Subclasses should implement this!')
@@ -25,6 +28,9 @@ class Table:
 
 
 class Student(Table):
+    """
+    Implements the work with the table student.
+    """
 
     def get(self, identificator=None, offset=None, limit=15):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -48,9 +54,10 @@ class Student(Table):
         )
 
     def remove(self, identificator):
-        self.cur.execute(
-            'DELETE FROM student WHERE id = %s;', (identificator,)
-        )
+        if self.validator.int_col(identificator):
+            self.cur.execute(
+                'DELETE FROM student WHERE id = %s;', (identificator,)
+            )
 
     def update(self, identificator, name):
         self.cur.execute(
@@ -69,17 +76,18 @@ class Student(Table):
         return self.cur.fetchone()[0] 
 
     def get_scores(self, identificator):
-        dict_cur = self.conn.cursor(cursor_factory=DictCursor)
-        dict_cur.execute(
-            'SELECT id, discipline_id, score '
-            'FROM student_discipline WHERE student_id = %s;',
-            (identificator,)
-        )
-        return {
-            dict(row)['discipline_id']: {
-                'score': dict(row)['score'], 'id': dict(row)['id']
-            } for row in dict_cur
-        }
+        if self.validator.int_col(identificator):
+            dict_cur = self.conn.cursor(cursor_factory=DictCursor)
+            dict_cur.execute(
+                'SELECT id, discipline_id, score '
+                'FROM student_discipline WHERE student_id = %s;',
+                (identificator,)
+            )
+            return {
+                dict(row)['discipline_id']: {
+                    'score': dict(row)['score'], 'id': dict(row)['id']
+                } for row in dict_cur
+            }
 
     def set_score(self, new_score, discipline, student_id, score_id):
         if not score_id:
@@ -95,9 +103,10 @@ class Student(Table):
             )
 
     def unset_score(self, score_id):
-        self.cur.execute(
-            'DELETE FROM student_discipline WHERE id = %s;', (score_id,)
-        )
+        if self.validator.int_col(score_id):
+            self.cur.execute(
+                'DELETE FROM student_discipline WHERE id = %s;', (score_id,)
+            )
 
     def search(self, string, offset, limit):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -110,11 +119,15 @@ class Student(Table):
 
 
 class Discipline(Table):
+    """
+    Implements the work with the table discipline.
+    """
 
     def add(self, title):
-        self.cur.execute(
-            'INSERT INTO discipline(title) VALUES (%s);', (title,)
-        )
+        if self.validator.text_col(title):
+            self.cur.execute(
+                'INSERT INTO discipline(title) VALUES (%s);', (title,)
+            )
 
     def get(self):
         dict_cur = self.conn.cursor(cursor_factory=DictCursor)
@@ -122,25 +135,47 @@ class Discipline(Table):
         return [dict(row) for row in dict_cur]
 
     def remove(self, identificator):
-        self.cur.execute(
-            'DELETE FROM discipline WHERE id = %s;', (identificator,)
-        )
+        if self.validator.int_col(identificator):
+            self.cur.execute(
+                'DELETE FROM discipline WHERE id = %s;', (identificator,)
+            )
 
     def update(self, identificator, title):
-        self.cur.execute(
-            'UPDATE discipline SET title = %s WHERE id = %s;',
-            (title, identificator)
-        )
+        if self.validator.int_col(identificator) and \
+        self.validator.text_col(title):
+            self.cur.execute(
+                'UPDATE discipline SET title = %s WHERE id = %s;',
+                (title, identificator)
+            )
 
     def count(self):
         self.cur.execute('SELECT count(id) FROM discipline;')
         return self.cur.fetchone()[0]
 
 
+class Validator:
+
+    def __init__(self, max_length):
+        self.max_length = max_length
+
+    def text_col(self, data):
+        return len(data) <= self.max_length
+
+    def int_col(self, data):
+        try:
+            return int(data)
+        except ValueError:
+            pass
+
+
 class DB:
+    """
+    Implements connection with database,
+    and creation of objects which work with tables
+    """
     tables = {
-        'student': Student,
-        'discipline': Discipline
+        'student': {'model': Student, 'max_length': 40},
+        'discipline': {'model': Discipline, 'max_length': 40}
     }
 
     def __init__(self, app):
@@ -164,5 +199,6 @@ class DB:
     def get_table(self, table_name):
         table = self.tables.get(table_name)
         if table is not None:
-            return table(self.conn, self.cur)
-        
+            return table['model'](
+                self.conn, self.cur, Validator(table['max_length'])
+            )
