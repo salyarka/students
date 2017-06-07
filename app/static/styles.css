@@ -8,3 +8,8 @@ table td, table th {
     border: 1px solid;
     padding: 5px;
 }
+
+form {
+	display: inline;
+	margin-left: 2%;
+}

@@ -4,7 +4,6 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
 {% block title %}{{ student['name'] }}{% endblock %}
-
 {% block content %}
 <h1>Student: {{ student['name'] }}</h1>
 <form action="{{ url_for('update_student', identificator=student['id']) }}">
@@ -14,35 +13,37 @@
   {{ form.update }}
 </form>
 <hr>
-<table>
-  <thead>
-    <th>Discipline</th>
-    <th>Score</th>
-    <th>Set</th>
-    <th>Delete</th>
-  </thead>
-  <tbody>
-    {% for each in disciplines %}
-      <tr>
-        <td>{{ each['title'] }}</td>
-        <td>
-          {{ scores[each['id']]['score'] }}
-        </td>
-        <td>
-          <form action="{{ url_for('set_score', identificator=student['id'], discipline=each['id'], score_id=scores[each['id']]['id']) }}">
-            <input type="hidden" name="_method" value="PUT">
-            <input type="text" name="update_score">
-            <button type="submit">Set</button>
-          </form>
-        </td>
-        <td>
-          <form action="{{ url_for('unset_score', identificator=student['id'], score_id=scores[each['id']]['id']) }}">
-            <input type="hidden" name="_method" value="PATCH">
-            <button type="submit">Unset</button>
-          </form>
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% if disciplines|length > 0 %}
+  <table>
+    <thead>
+      <th>Discipline</th>
+      <th>Score</th>
+      <th>Set</th>
+      <th>Delete</th>
+    </thead>
+    <tbody>
+      {% for each in disciplines %}
+        <tr>
+          <td>{{ each['title'] }}</td>
+          <td>
+            {{ scores[each['id']]['score'] }}
+          </td>
+          <td>
+            <form action="{{ url_for('set_score', identificator=student['id'], discipline=each['id'], score_id=scores[each['id']]['id']) }}">
+              <input type="hidden" name="_method" value="PUT">
+              <input type="text" name="update_score">
+              <button type="submit">Set</button>
+            </form>
+          </td>
+          <td>
+            <form action="{{ url_for('unset_score', identificator=student['id'], score_id=scores[each['id']]['id']) }}">
+              <input type="hidden" name="_method" value="PATCH">
+              <button type="submit">Unset</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
 {% endblock %}
