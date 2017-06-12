@@ -93,8 +93,15 @@ class Student(Table):
         if not score_id:
             self.cur.execute(
                 'INSERT INTO student_discipline '
-                '(score, discipline_id, student_id) VALUES (%s, %s, %s);',
-                (new_score, discipline, student_id)
+                '(score, discipline_id, student_id) '
+                'SELECT %(score)s, %(dis)s, %(student)s WHERE '
+                '(exists (select id from discipline where id = %(dis_id)s) and '
+                'exists (select id from student where id = %(student_id)s));',
+                {
+                    'score': new_score, 'dis': discipline,
+                    'student': student_id, 'dis_id': discipline,
+                    'student_id': student_id
+                }
             )
         else:
             self.cur.execute(
