@@ -8,8 +8,11 @@ CREATE TABLE discipline (
   title         varchar(40) NOT NULL
 );
 CREATE TABLE student_discipline(
-  student_id    integer REFERENCES student ON DELETE CASCADE,
-  discipline_id integer REFERENCES discipline ON DELETE CASCADE,
+  student_id    integer NOT NULL,
+  discipline_id integer NOT NULL,
   score         integer NOT NULL,
-  id            serial PRIMARY KEY
+  id            serial,
+  PRIMARY KEY (student_id, discipline_id, id),
+  FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE CASCADE,
+  FOREIGN KEY (discipline_id) REFERENCES discipline(id) ON DELETE CASCADE
 );
