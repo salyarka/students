@@ -1,4 +1,4 @@
-k## Description:
+## Description:
 This web app provides CRUD student and discipline management, uses builtin Flask server. The database schema is presented in schema.sql file.
 ## Requirements:
 * Linux
