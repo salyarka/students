@@ -131,9 +131,6 @@ def student(identificator):
         if each['id'] not in scores:
             scores[each['id']] = {'score': '', 'id': 0}
     form = StudentForm()
-    if form.validate_on_submit():
-        student.update(identificator, new_name)
-        return redirect(url_for('student'))
     return render_template(
         'student.html', student=student,
         form=form, disciplines=disciplines,
